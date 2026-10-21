@@ -254,7 +254,7 @@ int f_gagnant()
 /**
  * Prend comme argument la ligne et la colonne de la case
  * 	pour laquelle la bataille a lieu
- * Renvoie le couleur du gagnant
+ * Renvoie la couleur du gagnant
  * */
 int f_bataille(int l, int c)
 {
