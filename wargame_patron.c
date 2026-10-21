@@ -526,7 +526,7 @@ void f_humain(int joueur)
 int main(int argv, char *argc[])
 {
 	int fin = 0,mode=0 , ret, joueur = 1;
-	printf("1 humain vs IA\n2 humain vs humain\n3 IA vs IA\n");
+	
 	scanf("%d",&mode);
 
 	plateauDeJeu = f_init_plateau();
