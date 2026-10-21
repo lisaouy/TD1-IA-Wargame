@@ -314,7 +314,7 @@ int f_test_mouvement(Pion *plateau, int l1, int c1, int l2, int c2, int couleur)
 		return 1;
 
 	if(l1-l2 >1 || l2-l1 >1 || c1-c2 >1 || c2-c1 >1 || (l1==l2 && c1==c2))
-		retour = 1;
+		return 1;
 #ifdef DEBUG
 	printf("dbg: exiting %s %d\n", __FUNCTION__, __LINE__);
 #endif
@@ -412,9 +412,9 @@ int f_valeur(Pion* jeu, int joueur)
 }
 
 //fonction d'évaluation
-int f_eval(Pion* jeu,int joueur)
+int f_eval(Pion* jeu, int joueur)
 {
-	/** A vous de trouver une fonction efficace **/
+	return f_valeur(jeu, joueur) - f_valeur(jeu, -joueur);
 }
 
 //copie du plateau
@@ -449,16 +449,18 @@ Pion* f_raz_plateau()
 }
 
 //Fonction min trouve le minimum des noeuds fils
-??? f_min(???)
-		{
+int f_min(void)
+{
 	/** A remplir **/
-		}
+	return 0;
+}
 
 //Fonction max trouve le maximum des noeuds fils
-??? f_max(???)
-		{
+int f_max(void)
+{
 	/** A remplir **/
-		}
+	return 0;
+}
 
 /**
  * Calcule et joue le meilleur cout
@@ -528,6 +530,8 @@ int main(int argv, char *argc[])
 	scanf("%d",&mode);
 
 	plateauDeJeu = f_init_plateau();
+
+	printf("eval = %d\n", f_eval(plateauDeJeu, 1));
 	while (!fin)
 	{
 		f_affiche_plateau(plateauDeJeu);
