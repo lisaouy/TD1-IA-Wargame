@@ -256,7 +256,7 @@ int f_gagnant()
  * 	pour laquelle la bataille a lieu
  * Renvoie la couleur du gagnant
  * */
-int f_bataille(int l, int c)
+int f_bataille(Pion *plateau, int l, int c)
 {
 	int i, j, mini, maxi, minj, maxj;
 	int somme=0;
@@ -352,7 +352,7 @@ int f_bouge_piece(Pion *plateau, int l1, int c1, int l2, int c2, int couleur)
 	}
 	else
 	{
-		gagnant=f_bataille(l2, c2);
+		gagnant=f_bataille(plateau, l2, c2);
 		/* victoire */
 		if(gagnant == couleur)
 		{
@@ -527,11 +527,12 @@ int main(int argv, char *argc[])
 {
 	int fin = 0,mode=0 , ret, joueur = 1;
 	
+	printf("1 humain vs IA\n2 humain vs humain\n3 IA vs IA\n");
 	scanf("%d",&mode);
 
 	plateauDeJeu = f_init_plateau();
 
-	printf("eval = %d\n", f_eval(plateauDeJeu, 1));
+	
 	while (!fin)
 	{
 		f_affiche_plateau(plateauDeJeu);
