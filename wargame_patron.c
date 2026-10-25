@@ -212,7 +212,7 @@ void f_affiche_plateau(Pion *plateau)
 }
 
 
-int f_gagnant()
+int f_gagnant(Pion *plateau)
 {
 	int i, j, somme1=0, somme2=0;
 
@@ -224,9 +224,9 @@ int f_gagnant()
 	//Quelqu'un est-il arrive sur la ligne de l'autre
 	for(i=0; i<NB_COLONNES; i++)
 	{
-		if(plateauDeJeu[i].couleur == 1)
+		if(plateau[i].couleur == 1)
 			return 1;
-		if(plateauDeJeu[(NB_LIGNES-1)*NB_COLONNES+i].couleur == -1)
+		if(plateau[(NB_LIGNES-1)*NB_COLONNES+i].couleur == -1)
 			return -1;
 	}
 
@@ -235,9 +235,9 @@ int f_gagnant()
 	{
 		for(j=0; j<NB_COLONNES; j++)
 		{
-			if(plateauDeJeu[i*NB_COLONNES+j].couleur == 1)
+			if(plateau[i*NB_COLONNES+j].couleur == 1)
 				somme1++;
-			if(plateauDeJeu[i*NB_COLONNES+j].couleur == -1)
+			if(plateau[i*NB_COLONNES+j].couleur == -1)
 				somme2++;
 		}
 	}
@@ -413,10 +413,36 @@ int f_valeur(Pion* jeu, int joueur)
 	return valeur;
 }
 
+//Calcul de l'avancee des pions du joueur vers la ligne adverse
+int f_avance(Pion* jeu, int joueur)
+{
+	int l, c, total=0;
+	for(l=0; l<NB_LIGNES; l++)
+	{
+		for(c=0; c<NB_COLONNES; c++)
+		{
+			if(jeu[l*NB_COLONNES+c].couleur == joueur)
+			{
+				if(joueur == 1)
+					total += NB_LIGNES-1-l;
+				else
+					total += l;
+			}
+		}
+	}
+	return total;
+}
+
 //fonction d'évaluation
 int f_eval(Pion* jeu, int joueur)
 {
-	return f_valeur(jeu, joueur) - f_valeur(jeu, -joueur);
+	int g = f_gagnant(jeu);
+
+	if(g == joueur)
+		return 1000;
+	if(g == -joueur)
+		return -1000;
+	return 10*(f_valeur(jeu, joueur) - f_valeur(jeu, -joueur)) + f_avance(jeu, joueur) - f_avance(jeu, -joueur);
 }
 
 //copie du plateau
@@ -460,7 +486,7 @@ int f_max(Pion *jeu, int joueur, int profondeur, int alpha, int beta)
 	Pion *copie;
 	nbNoeuds++;
 
-	if(profondeur == 0)
+	if(profondeur == 0 || f_gagnant(jeu) != 0)
 		return f_eval(jeu, joueur);
 
 	copie = f_raz_plateau();
@@ -504,7 +530,7 @@ int f_min(Pion *jeu, int joueur, int profondeur, int alpha, int beta)
 	Pion *copie;
 	nbNoeuds++;
 
-	if(profondeur == 0)
+	if(profondeur == 0 || f_gagnant(jeu) != 0)
 		return f_eval(jeu, joueur);
 
 	copie = f_raz_plateau();
@@ -676,7 +702,7 @@ int main(int argv, char *argc[])
 			f_IA(joueur);
 		}
 
-		if ((ret = f_gagnant()) != 0)
+		if ((ret = f_gagnant(plateauDeJeu)) != 0)
 		{
 			switch (ret)
 			{
