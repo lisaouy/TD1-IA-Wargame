@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 
 #define NB_LIGNES 10
 #define NB_COLONNES 10
 #define INFINI 10000
 #define PROFONDEUR 3
+#define ALPHA_BETA 1
 
 /*#define DEBUG*/
 
@@ -17,6 +19,7 @@ typedef struct pion_s
 }Pion;
 
 Pion *plateauDeJeu;
+long nbNoeuds = 0;
 
 void f_affiche_plateau(Pion *plateau);
 int f_convert_char2int(char c);
@@ -447,14 +450,15 @@ Pion* f_raz_plateau()
 	return jeu;
 }
 
-int f_min(Pion *jeu, int joueur, int profondeur);
+int f_min(Pion *jeu, int joueur, int profondeur, int alpha, int beta);
 
 //Fonction max trouve le maximum des noeuds fils
-int f_max(Pion *jeu, int joueur, int profondeur)
+int f_max(Pion *jeu, int joueur, int profondeur, int alpha, int beta)
 {
 	int l, c, dl, dc, valeur;
 	int meilleur = -INFINI;
 	Pion *copie;
+	nbNoeuds++;
 
 	if(profondeur == 0)
 		return f_eval(jeu, joueur);
@@ -473,9 +477,16 @@ int f_max(Pion *jeu, int joueur, int profondeur)
 					f_copie_plateau(jeu, copie);
 					if(f_bouge_piece(copie, l, c, l+dl, c+dc, joueur) == 0)
 					{
-						valeur = f_min(copie, joueur, profondeur-1);
+						valeur = f_min(copie, joueur, profondeur-1, alpha, beta);
 						if(valeur > meilleur)
 							meilleur = valeur;
+						if(meilleur > alpha)
+							alpha = meilleur;
+						if(ALPHA_BETA && alpha >= beta)
+						{
+							free(copie);
+							return meilleur;
+						}
 					}
 				}
 			}
@@ -486,11 +497,12 @@ int f_max(Pion *jeu, int joueur, int profondeur)
 }
 
 //Fonction min trouve le minimum des noeuds fils
-int f_min(Pion *jeu, int joueur, int profondeur)
+int f_min(Pion *jeu, int joueur, int profondeur, int alpha, int beta)
 {
 	int l, c, dl, dc, valeur;
 	int meilleur = INFINI;
 	Pion *copie;
+	nbNoeuds++;
 
 	if(profondeur == 0)
 		return f_eval(jeu, joueur);
@@ -509,9 +521,16 @@ int f_min(Pion *jeu, int joueur, int profondeur)
 					f_copie_plateau(jeu, copie);
 					if(f_bouge_piece(copie, l, c, l+dl, c+dc, -joueur) == 0)
 					{
-						valeur = f_max(copie, joueur, profondeur-1);
+						valeur = f_max(copie, joueur, profondeur-1, alpha, beta);
 						if(valeur < meilleur)
 							meilleur = valeur;
+						if(meilleur < beta)
+							beta = meilleur;
+						if(ALPHA_BETA && alpha >= beta)
+						{
+							free(copie);
+							return meilleur;
+						}
 					}
 				}
 			}
@@ -530,10 +549,14 @@ void f_IA(int joueur)
 	int meilleur = -INFINI;
 	int bl = -1, bc = -1, bdl = 0, bdc = 0;
 	Pion *copie;
+	clock_t debut;
 
 #ifdef DEBUG
 	printf("dbg: entering %s %d\n", __FUNCTION__, __LINE__);
 #endif
+
+	nbNoeuds = 0;
+	debut = clock();
 
 	copie = f_raz_plateau();
 	for(l=0; l<NB_LIGNES; l++)
@@ -549,7 +572,7 @@ void f_IA(int joueur)
 					f_copie_plateau(plateauDeJeu, copie);
 					if(f_bouge_piece(copie, l, c, l+dl, c+dc, joueur) == 0)
 					{
-						valeur = f_min(copie, joueur, PROFONDEUR-1);
+						valeur = f_min(copie, joueur, PROFONDEUR-1, meilleur, INFINI);
 						if(valeur > meilleur)
 						{
 							meilleur = valeur;
@@ -565,6 +588,8 @@ void f_IA(int joueur)
 	}
 	free(copie);
 
+	printf("Noeuds visites : %ld, temps : %.3f s\n", nbNoeuds, (double)(clock() - debut) / CLOCKS_PER_SEC);
+
 	if(bl != -1)
 	{
 		f_bouge_piece(plateauDeJeu, bl, bc, bl+bdl, bc+bdc, joueur);
@@ -575,7 +600,6 @@ void f_IA(int joueur)
 	printf("dbg: exiting %s %d\n", __FUNCTION__, __LINE__);
 #endif
 }
-
 
 /**
  * Demande le choix du joueur humain et calcule le coup demande
