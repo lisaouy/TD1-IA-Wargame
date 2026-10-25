@@ -1,5 +1,3 @@
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,6 +6,7 @@
 #define NB_LIGNES 10
 #define NB_COLONNES 10
 #define INFINI 10000
+#define PROFONDEUR 3
 
 /*#define DEBUG*/
 
@@ -527,11 +526,50 @@ int f_min(Pion *jeu, int joueur, int profondeur)
  * */
 void f_IA(int joueur)
 {
+	int l, c, dl, dc, valeur;
+	int meilleur = -INFINI;
+	int bl = -1, bc = -1, bdl = 0, bdc = 0;
+	Pion *copie;
+
 #ifdef DEBUG
 	printf("dbg: entering %s %d\n", __FUNCTION__, __LINE__);
 #endif
 
-	/** A remplir **/
+	copie = f_raz_plateau();
+	for(l=0; l<NB_LIGNES; l++)
+	{
+		for(c=0; c<NB_COLONNES; c++)
+		{
+			if(plateauDeJeu[l*NB_COLONNES+c].couleur != joueur)
+				continue;
+			for(dl=-1; dl<=1; dl++)
+			{
+				for(dc=-1; dc<=1; dc++)
+				{
+					f_copie_plateau(plateauDeJeu, copie);
+					if(f_bouge_piece(copie, l, c, l+dl, c+dc, joueur) == 0)
+					{
+						valeur = f_min(copie, joueur, PROFONDEUR-1);
+						if(valeur > meilleur)
+						{
+							meilleur = valeur;
+							bl = l;
+							bc = c;
+							bdl = dl;
+							bdc = dc;
+						}
+					}
+				}
+			}
+		}
+	}
+	free(copie);
+
+	if(bl != -1)
+	{
+		f_bouge_piece(plateauDeJeu, bl, bc, bl+bdl, bc+bdc, joueur);
+		printf("IA joue : %c%d%c%d\n", f_convert_int2char(bc), bl, f_convert_int2char(bc+bdc), bl+bdl);
+	}
 
 #ifdef DEBUG
 	printf("dbg: exiting %s %d\n", __FUNCTION__, __LINE__);
