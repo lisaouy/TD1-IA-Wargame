@@ -448,18 +448,78 @@ Pion* f_raz_plateau()
 	return jeu;
 }
 
-//Fonction min trouve le minimum des noeuds fils
-int f_min(void)
-{
-	/** A remplir **/
-	return 0;
-}
+int f_min(Pion *jeu, int joueur, int profondeur);
 
 //Fonction max trouve le maximum des noeuds fils
-int f_max(void)
+int f_max(Pion *jeu, int joueur, int profondeur)
 {
-	/** A remplir **/
-	return 0;
+	int l, c, dl, dc, valeur;
+	int meilleur = -INFINI;
+	Pion *copie;
+
+	if(profondeur == 0)
+		return f_eval(jeu, joueur);
+
+	copie = f_raz_plateau();
+	for(l=0; l<NB_LIGNES; l++)
+	{
+		for(c=0; c<NB_COLONNES; c++)
+		{
+			if(jeu[l*NB_COLONNES+c].couleur != joueur)
+				continue;
+			for(dl=-1; dl<=1; dl++)
+			{
+				for(dc=-1; dc<=1; dc++)
+				{
+					f_copie_plateau(jeu, copie);
+					if(f_bouge_piece(copie, l, c, l+dl, c+dc, joueur) == 0)
+					{
+						valeur = f_min(copie, joueur, profondeur-1);
+						if(valeur > meilleur)
+							meilleur = valeur;
+					}
+				}
+			}
+		}
+	}
+	free(copie);
+	return meilleur;
+}
+
+//Fonction min trouve le minimum des noeuds fils
+int f_min(Pion *jeu, int joueur, int profondeur)
+{
+	int l, c, dl, dc, valeur;
+	int meilleur = INFINI;
+	Pion *copie;
+
+	if(profondeur == 0)
+		return f_eval(jeu, joueur);
+
+	copie = f_raz_plateau();
+	for(l=0; l<NB_LIGNES; l++)
+	{
+		for(c=0; c<NB_COLONNES; c++)
+		{
+			if(jeu[l*NB_COLONNES+c].couleur != -joueur)
+				continue;
+			for(dl=-1; dl<=1; dl++)
+			{
+				for(dc=-1; dc<=1; dc++)
+				{
+					f_copie_plateau(jeu, copie);
+					if(f_bouge_piece(copie, l, c, l+dl, c+dc, -joueur) == 0)
+					{
+						valeur = f_max(copie, joueur, profondeur-1);
+						if(valeur < meilleur)
+							meilleur = valeur;
+					}
+				}
+			}
+		}
+	}
+	free(copie);
+	return meilleur;
 }
 
 /**
@@ -529,8 +589,10 @@ int main(int argv, char *argc[])
 	
 	printf("1 humain vs IA\n2 humain vs humain\n3 IA vs IA\n");
 	scanf("%d",&mode);
+	getchar();
 
 	plateauDeJeu = f_init_plateau();
+	
 
 	
 	while (!fin)
