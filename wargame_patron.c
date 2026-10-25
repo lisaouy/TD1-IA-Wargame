@@ -273,10 +273,10 @@ int f_bataille(Pion *plateau, int l, int c)
 	{
 		for(j=minj; j<=maxj; j++)
 		{
-			somme += plateauDeJeu[i*NB_COLONNES+j].couleur*plateauDeJeu[i*NB_COLONNES+j].valeur;
+			somme += plateau[i*NB_COLONNES+j].couleur*plateau[i*NB_COLONNES+j].valeur;
 		}
 	}
-	somme -= plateauDeJeu[l*NB_COLONNES+c].couleur*plateauDeJeu[l*NB_COLONNES+c].valeur;
+	somme -= plateau[l*NB_COLONNES+c].couleur*plateau[l*NB_COLONNES+c].valeur;
 
 #ifdef DEBUG
 	printf("dbg: exiting %s %d\n", __FUNCTION__, __LINE__);
@@ -286,7 +286,7 @@ int f_bataille(Pion *plateau, int l, int c)
 	if(somme > 0)
 		return 1;
 
-	return plateauDeJeu[l*NB_COLONNES+c].couleur;
+	return plateau[l*NB_COLONNES+c].couleur;
 }
 
 
